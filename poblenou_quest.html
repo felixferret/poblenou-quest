@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PobleNou Quest — Serious Game eHealth</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f4f5f7;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px}
+#app{width:100%;max-width:640px;background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 16px rgba(0,0,0,0.08)}
+.screen{display:none}
+.screen.active{display:block}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:600;color:#111827;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#111827;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s}
+.btn:hover{background:#f9fafb}
+.btn-primary{background:#1B3A5C;border-color:#1B3A5C;color:#fff}
+.btn-primary:hover{background:#264d7a}
+.btn-success{background:#0F6E56;border-color:#0F6E56;color:#fff}
+.btn-success:hover{background:#1D9E75}
+.btn-danger{background:#A32D2D;border-color:#A32D2D;color:#fff}
+.btn-block{width:100%;justify-content:center;margin-top:8px}
+.input-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.input-row label{font-size:13px;color:#6b7280;min-width:120px;font-weight:500}
+.input-row input{width:100px;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;color:#111827}
+.semafore{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:8px;margin:10px 0;font-size:13px;font-weight:500;line-height:1.5}
+.sem-green{background:#ecfdf5;color:#065f46;border:1px solid #6ee7b7}
+.sem-yellow{background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+.sem-red{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5}
+.sem-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.dot-green{background:#10b981}
+.dot-yellow{background:#f59e0b}
+.dot-red{background:#ef4444}
+.symptom-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f3f4f6;font-size:13px;color:#374151}
+.symptom-row:last-child{border-bottom:none}
+.toggle-btns{display:flex;gap:5px}
+.toggle-btn{padding:4px 12px;border-radius:6px;border:1px solid #d1d5db;font-size:12px;font-weight:500;cursor:pointer;background:#fff;color:#6b7280}
+.toggle-btn.sel-no{background:#ecfdf5;border-color:#6ee7b7;color:#065f46}
+.toggle-btn.sel-yes{background:#fef2f2;border-color:#fca5a5;color:#991b1b}
+.coins-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f9fafb;border-radius:8px;margin-bottom:14px;border:1px solid #e5e7eb}
+.coins-count{font-size:20px;font-weight:700;color:#111827}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600}
+.badge-green{background:#ecfdf5;color:#065f46}
+.badge-gray{background:#f3f4f6;color:#6b7280}
+.badge-blue{background:#eff6ff;color:#1e40af}
+.zone-card{border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s}
+.zone-card:hover{border-color:#93c5fd}
+.zone-card.unlocked{border-color:#6ee7b7;background:#f0fdf4}
+.zone-card.locked{opacity:0.7}
+.mini-game-area{background:#f9fafb;border-radius:10px;padding:20px;text-align:center;margin:10px 0;border:1px solid #e5e7eb}
+#rhythm-display{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0;min-height:52px}
+.beat-circle{width:26px;height:26px;border-radius:50%;background:#e5e7eb;display:inline-block;transition:all 0.1s}
+.beat-circle.active{background:#10b981;transform:scale(1.35)}
+.beat-circle.hit{background:#1D9E75}
+.question-opt{width:100%;text-align:left;padding:10px 14px;margin:5px 0;border-radius:8px;border:1px solid #e5e7eb;background:#fff;color:#111827;font-size:13px;cursor:pointer;transition:all 0.15s;font-family:inherit}
+.question-opt:hover:not(:disabled){background:#f9fafb}
+.question-opt.correct{background:#ecfdf5;border-color:#6ee7b7;color:#065f46;font-weight:600}
+.question-opt.wrong{background:#fef2f2;border-color:#fca5a5;color:#991b1b}
+.progress-bar{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;margin:4px 0 8px}
+.progress-fill{height:100%;background:#10b981;border-radius:3px;transition:width 0.4s}
+#map-wrap{position:relative;width:100%;height:300px;background:linear-gradient(135deg,#e0f2fe 0%,#dcfce7 60%,#fef9c3 100%);border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;margin-bottom:12px}
+.map-roads{position:absolute;inset:0;opacity:0.18}
+.zone-pin{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;z-index:2}
+.pin-circle{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:transform 0.15s}
+.pin-circle:hover{transform:scale(1.15)}
+.zone-pin.locked .pin-circle{filter:grayscale(1);opacity:0.5}
+.pin-label{font-size:9px;font-weight:600;color:#111827;background:#fff;padding:2px 5px;border-radius:4px;margin-top:3px;white-space:nowrap;border:1px solid #e5e7eb;max-width:80px;text-align:center;line-height:1.3}
+.legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.legend-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f9fafb;border-radius:8px;cursor:pointer;border:1px solid #e5e7eb;font-size:12px;transition:border-color 0.15s}
+.legend-item:hover{border-color:#93c5fd}
+.zone-detail-box{background:#f0fdf4;border:1px solid #6ee7b7;border-radius:10px;padding:14px;margin-top:10px}
+.zone-detail-box.locked{background:#f9fafb;border-color:#e5e7eb}
+.tap-btn{font-size:22px;padding:14px 36px;border-radius:10px;border:2px solid #1B3A5C;background:#1B3A5C;color:#fff;cursor:pointer;font-weight:700;font-family:inherit;transition:transform 0.1s;user-select:none}
+.tap-btn:active{transform:scale(0.95)}
+.tap-btn:disabled{opacity:0.4;cursor:default}
+.complete-box{text-align:center;padding:20px}
+.stars{font-size:32px;margin:10px 0}
+.feedback-box{padding:12px 14px;border-radius:8px;font-size:13px;margin-top:10px;line-height:1.5}
+.fb-ok{background:#ecfdf5;color:#065f46;border:1px solid #6ee7b7}
+.fb-warn{background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+h1{font-size:22px;font-weight:700;color:#111827}
+h2{font-size:17px;font-weight:600;color:#111827;margin-bottom:4px}
+.muted{font-size:13px;color:#6b7280}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#6b7280;cursor:pointer;margin-bottom:14px;background:none;border:none;font-family:inherit;padding:0}
+.back-btn:hover{color:#111827}
+.sep{height:1px;background:#f3f4f6;margin:12px 0}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- WELCOME -->
+<div id="screen-welcome" class="screen active">
+  <div style="text-align:center;padding:24px 0 16px">
+    <div style="font-size:48px;margin-bottom:8px">🏃‍♀️</div>
+    <h1>PobleNou Quest</h1>
+    <p class="muted" style="margin-top:6px;margin-bottom:20px">Desbloqueja els 6 espais esportius del Poblenou<br>completant sessions i guanyant monedes 🪙</p>
+    <button class="btn btn-primary" onclick="goTo('screen-pa')" style="font-size:15px;padding:12px 28px">
+      <i class="ti ti-player-play"></i> Iniciar sessió
+    </button>
+  </div>
+  <div class="sep"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+    <div style="padding:12px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb">
+      <div style="font-size:20px;margin-bottom:4px">🩺</div>
+      <div style="font-size:13px;font-weight:600;color:#111827">Control PA</div>
+      <div class="muted" style="font-size:11px;margin-top:2px">Comprovació prèvia de pressió arterial i símptomes</div>
+    </div>
+    <div style="padding:12px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb">
+      <div style="font-size:20px;margin-bottom:4px">🎵</div>
+      <div style="font-size:13px;font-weight:600;color:#111827">Mini-joc rítmic</div>
+      <div class="muted" style="font-size:11px;margin-top:2px">Simula el moviment físic de cada zona esportiva</div>
+    </div>
+    <div style="padding:12px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb">
+      <div style="font-size:20px;margin-bottom:4px">🧠</div>
+      <div style="font-size:13px;font-weight:600;color:#111827">Pregunta de salut</div>
+      <div class="muted" style="font-size:11px;margin-top:2px">Demostra el teu coneixement sobre exercici i PA</div>
+    </div>
+    <div style="padding:12px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb">
+      <div style="font-size:20px;margin-bottom:4px">🗺️</div>
+      <div style="font-size:13px;font-weight:600;color:#111827">Desbloqueja el mapa</div>
+      <div class="muted" style="font-size:11px;margin-top:2px">Guanya monedes i obre nous espais del Poblenou</div>
+    </div>
+  </div>
+  <button class="btn btn-block" onclick="goTo('screen-map')" style="margin-top:14px">
+    <i class="ti ti-map"></i> Veure el mapa
+  </button>
+</div>
+
+<!-- PA CHECK -->
+<div id="screen-pa" class="screen">
+  <button class="back-btn" onclick="goTo('screen-welcome')"><i class="ti ti-arrow-left"></i> Tornar</button>
+  <h2>Control previ a la sessió</h2>
+  <p class="muted" style="margin-bottom:16px">Mesura la teva pressió arterial i comprova els símptomes abans de fer exercici</p>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-stethoscope"></i> Pressió arterial en repòs</div>
+    <p class="muted" style="font-size:12px;margin-bottom:14px">Reposa 10 minuts asseguda. Realitza 3 mesures amb el tensiómetro homologat i introdueix la mitjana de les 2 últimes (protocol ESH/ESC).</p>
+    <div class="input-row">
+      <label>Sistòlica (mmHg)</label>
+      <input type="number" id="pas" placeholder="ex: 142" min="60" max="230" oninput="checkPA()">
+      <span class="muted">mmHg</span>
+    </div>
+    <div class="input-row">
+      <label>Diastòlica (mmHg)</label>
+      <input type="number" id="pad" placeholder="ex: 88" min="40" max="140" oninput="checkPA()">
+      <span class="muted">mmHg</span>
+    </div>
+    <div id="pa-result"></div>
+    <div id="pa-advice" style="display:none;font-size:12px;color:#374151;padding:10px 12px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;margin-top:8px;line-height:1.6"></div>
+  </div>
+
+  <div class="card" id="symptoms-card" style="display:none">
+    <div class="card-title"><i class="ti ti-clipboard-check"></i> Qüestionari de símptomes previs</div>
+    <p class="muted" style="font-size:12px;margin-bottom:12px">Tens algun d'aquests símptomes avui? Respon honestament.</p>
+    <div class="symptom-row"><span>Dolor o pressió al pit</span><div class="toggle-btns"><button class="toggle-btn sel-no" onclick="setSym(this,'chest','no')">No</button><button class="toggle-btn" onclick="setSym(this,'chest','yes')">Sí</button></div></div>
+    <div class="symptom-row"><span>Marejos o sensació de cap buit</span><div class="toggle-btns"><button class="toggle-btn sel-no" onclick="setSym(this,'dizzy','no')">No</button><button class="toggle-btn" onclick="setSym(this,'dizzy','yes')">Sí</button></div></div>
+    <div class="symptom-row"><span>Dificultat per respirar en repòs</span><div class="toggle-btns"><button class="toggle-btn sel-no" onclick="setSym(this,'breath','no')">No</button><button class="toggle-btn" onclick="setSym(this,'breath','yes')">Sí</button></div></div>
+    <div class="symptom-row"><span>Palpitacions irregulars</span><div class="toggle-btns"><button class="toggle-btn sel-no" onclick="setSym(this,'palp','no')">No</button><button class="toggle-btn" onclick="setSym(this,'palp','yes')">Sí</button></div></div>
+    <div class="symptom-row"><span>Dolor a les cames en repòs</span><div class="toggle-btns"><button class="toggle-btn sel-no" onclick="setSym(this,'legs','no')">No</button><button class="toggle-btn" onclick="setSym(this,'legs','yes')">Sí</button></div></div>
+  </div>
+
+  <div id="pa-action" style="text-align:center;margin-top:4px"></div>
+</div>
+
+<!-- ZONE SELECT -->
+<div id="screen-zone-select" class="screen">
+  <button class="back-btn" onclick="goTo('screen-welcome')"><i class="ti ti-arrow-left"></i> Tornar</button>
+  <h2>Tria la zona d'avui</h2>
+  <p class="muted" style="margin-bottom:12px">Selecciona un espai desbloquejat per fer la sessió, o desbloqueja'n un de nou</p>
+  <div class="coins-bar">
+    <span style="font-size:18px">🪙</span>
+    <span class="coins-count" id="coins-zs">0</span>
+    <span class="muted" style="flex:1">monedes</span>
+    <span class="badge badge-blue" id="sessions-zs">0 sessions</span>
+  </div>
+  <div id="zones-list"></div>
+</div>
+
+<!-- MINI-GAME -->
+<div id="screen-minigame" class="screen">
+  <button class="back-btn" onclick="goTo('screen-zone-select')"><i class="ti ti-arrow-left"></i> Tornar</button>
+  <div class="card" id="mg-header">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="mg-emoji" style="font-size:32px"></span>
+      <div>
+        <div style="font-size:15px;font-weight:600;color:#111827" id="mg-name"></div>
+        <div class="muted" style="font-size:12px" id="mg-type"></div>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <p class="muted" style="font-size:12px" id="mg-exercise"></p>
+  </div>
+
+  <!-- FASE RITME -->
+  <div id="phase-rhythm">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-music"></i> Mini-joc rítmic</div>
+      <p class="muted" style="font-size:12px;margin-bottom:10px">Prem <strong>TAP</strong> o la tecla <strong>Espai</strong> quan les llums siguin verdes. Simula el moviment de la sessió!</p>
+      <div class="mini-game-area">
+        <div id="rhythm-display"></div>
+        <div style="font-size:13px;color:#6b7280;margin-bottom:12px">
+          Encerts: <strong id="hit-count" style="color:#111827">0</strong> / <strong id="hits-needed" style="color:#111827">8</strong>
+          &nbsp;|&nbsp; Temps: <strong id="timer-disp" style="color:#111827">20</strong>s
+        </div>
+        <button class="tap-btn" id="tap-btn" onclick="rhythmHit()">TAP!</button>
+      </div>
+      <div id="rhythm-result" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- FASE PREGUNTA -->
+  <div id="phase-question" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-brain"></i> Pregunta de salut</div>
+      <div style="font-size:14px;color:#111827;margin-bottom:14px;line-height:1.5;font-weight:500" id="q-text"></div>
+      <div id="q-opts"></div>
+      <div id="q-feedback" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- FASE COMPLETAT -->
+  <div id="phase-complete" style="display:none">
+    <div class="card">
+      <div class="complete-box">
+        <div class="stars" id="complete-stars"></div>
+        <h2 id="complete-title"></h2>
+        <p class="muted" style="margin:6px 0 16px" id="complete-sub"></p>
+        <div style="font-size:36px;font-weight:700;color:#0F6E56;margin-bottom:16px">+<span id="coins-earned">0</span> 🪙</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="goTo('screen-map')"><i class="ti ti-map"></i> Veure el mapa</button>
+          <button class="btn btn-success" onclick="goTo('screen-zone-select')"><i class="ti ti-refresh"></i> Altra sessió</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAP -->
+<div id="screen-map" class="screen">
+  <button class="back-btn" onclick="goTo('screen-welcome')"><i class="ti ti-arrow-left"></i> Tornar</button>
+  <h2>Mapa del Poblenou</h2>
+  <p class="muted" style="margin-bottom:12px">Clica qualsevol zona per veure'n els detalls</p>
+  <div class="coins-bar">
+    <span style="font-size:18px">🪙</span>
+    <span class="coins-count" id="coins-map">0</span>
+    <span class="muted" style="flex:1">monedes</span>
+    <span class="badge badge-green" id="unlock-prog">0/6 zones</span>
+  </div>
+  <div id="map-wrap">
+    <svg class="map-roads" viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg">
+      <line x1="0" y1="150" x2="640" y2="150" stroke="#94a3b8" stroke-width="3"/>
+      <line x1="320" y1="0" x2="320" y2="300" stroke="#94a3b8" stroke-width="3"/>
+      <line x1="0" y1="75" x2="640" y2="75" stroke="#cbd5e1" stroke-width="1.5"/>
+      <line x1="0" y1="225" x2="640" y2="225" stroke="#cbd5e1" stroke-width="1.5"/>
+      <line x1="160" y1="0" x2="160" y2="300" stroke="#cbd5e1" stroke-width="1.5"/>
+      <line x1="480" y1="0" x2="480" y2="300" stroke="#cbd5e1" stroke-width="1.5"/>
+      <line x1="0" y1="0" x2="640" y2="300" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="640" y1="0" x2="0" y2="300" stroke="#cbd5e1" stroke-width="1"/>
+      <rect x="580" y="260" width="56" height="16" rx="3" fill="#94a3b8" opacity="0.5"/>
+      <text x="608" y="272" text-anchor="middle" font-size="8" fill="#475569">Mar Mediterrani</text>
+    </svg>
+  </div>
+  <div class="legend-grid" id="map-legend"></div>
+  <div id="zone-detail-map" style="margin-top:10px"></div>
+</div>
+
+</div>
+
+<script>
+const ZONES=[
+  {id:'cem',name:'CEM Poblenou',emoji:'🏋️',type:'Gimnàs municipal',desc:'Centre Esportiu Municipal amb sala de fitness, piscina coberta, classes dirigides i vestuaris. Disponible tot l\'any.',exercise:'Sessió de força amb bandes elàstiques i pes corporal. Exercicis multiarticulars guiats.',cost:0,x:52,y:42,bg:'#1B3A5C',q:0,coins:15},
+  {id:'parc',name:'Parc del Poblenou',emoji:'🌳',type:'Parc urbà',desc:'Parc urbà al cor del Poblenou amb circuit de caminada, àrea de calistènia, bancs i zona verda. A 5 minuts a peu.',exercise:'Caminada rítmica de 30 minuts a 100-110 bpm + exercicis de coordinació i equilibri.',cost:20,x:32,y:60,bg:'#0F6E56',q:1,coins:20},
+  {id:'platja',name:'Platja del Poblenou',emoji:'🏖️',type:'Espai litoral',desc:'Front marítim amb carril running de sorra compactada, zona de passeig i aire fresc del mar.',exercise:'Marxa ràpida pel Passeig Marítim 35 min + tècniques de respiració 4-7-8 per reducció PA.',cost:40,x:72,y:68,bg:'#185FA5',q:2,coins:20},
+  {id:'ciutadella',name:'Parc de la Ciutadella',emoji:'🌿',type:'Parc metropolità',desc:'Gran parc de Barcelona amb pistes de running, zones de ioga, llac i espais de relaxació.',exercise:'Caminada llarga 40 min + estiraments globals i ADM avançat a l\'aire lliure.',cost:60,x:20,y:32,bg:'#3B6D11',q:3,coins:25},
+  {id:'piscina',name:'Piscina Municipal Picornell',emoji:'🏊',type:'Piscina olímpica',desc:'Complex esportiu de Montjuïc amb piscines olímpiques cobertes i descobertes, cursos i llanes reservades.',exercise:'Natació contínua 30-35 min (crol o esquena) o aquaeròbic adaptat a intensitat moderada.',cost:85,x:46,y:18,bg:'#0C447C',q:4,coins:30},
+  {id:'diagonal',name:'Parc Diagonal Mar',emoji:'🌴',type:'Parc modern',desc:'Parc contemporani amb circuits esportius, llac artificial, zones de benestar i escultures.',exercise:'Circuit de coordinació i equilibri + HIIT lleu adaptat (3×3 min) en espai obert.',cost:110,x:80,y:30,bg:'#854F0B',q:5,coins:35},
+];
+
+const QUESTIONS=[
+  {q:'Quina pressió arterial es considera el llindar per NO realitzar exercici físic?',opts:['A. PAS > 120 mmHg','B. PAS ≥ 180 mmHg o PAD ≥ 110 mmHg','C. PAS > 140 mmHg','D. Qualsevol PA elevada'],correct:1,exp:'Segons les guies ESH/ESC i l\'ACSM, una PAS ≥ 180 mmHg o PAD ≥ 110 mmHg en repòs és una contraindicació absoluta per fer exercici físic. Cal reposar i contactar el metge.'},
+  {q:'Quina reducció de la PA sistòlica pot produir la caminada rítmica regular en dones de 50-65 anys?',opts:['A. Cap efecte mesurable','B. Reducció de 4-9 mmHg (similar a un fàrmac antihipertensiu)','C. Reducció de 30-40 mmHg','D. Augment temporal de la PA'],correct:1,exp:'Wang et al. (2022) i Cornelissen & Smart (2013) confirmen que l\'exercici aeròbic regular redueix la PAS entre 4-9 mmHg, efecte comparable al d\'alguns fàrmacs antihipertensius de primera línia.'},
+  {q:'Quina tècnica de respiració s\'utilitza al final de cada sessió per reduir la pressió arterial?',opts:['A. Respiració toràcica ràpida','B. Apnea prolongada','C. Respiració 4-7-8 (inspiració 4s, retenció 7s, expiració 8s)','D. Hiperventilació controlada'],correct:2,exp:'La tècnica 4-7-8 activa el sistema nerviós parasimpàtic, reduint la FC i la PA. Sakairi et al. (2025) demostren reduccions de fins a 5 mmHg amb tècniques de respiració conscient en pacients hipertensos.'},
+  {q:'Quin exercici ha demostrat major reducció del greix corporal en dones postmenopàusiques obeses?',opts:['A. Estiraments passius 3x/setmana','B. Entrenament de força amb bandes elàstiques (Son & Park, 2021)','C. Repòs actiu','D. Exercici aeròbic molt intens 1x/setmana'],correct:1,exp:'Son & Park (2021) demostren que l\'entrenament de força amb bandes elàstiques en dones postmenopàusiques obeses produeix: ↓ IMC (−0,8 kg/m²), ↓ % greix (−2,1%), ↓ cintura (−3,2 cm) i ↑ massa magra (+1,3 kg).'},
+  {q:'Per a la Núria (57 anys), quina és la FC màxima estimada i la zona segura d\'entrenament?',opts:['A. FCmax 220 bpm; zona segura 80-90%','B. FCmax 163 bpm (Tanaka); zona segura 120-140 bpm (75-85%)','C. FCmax 163 bpm; zona segura 50-60 bpm','D. FCmax 200 bpm; zona segura 160-180 bpm'],correct:1,exp:'Fórmula Tanaka et al. (2001): FCmax = 206,9 − (0,67 × 57) = 163 bpm. La zona d\'entrenament segura en la fase de progressió és el 75-85% FCmax = 122-138 bpm, monitorada amb wearable.'},
+  {q:'Quin valor d\'ACWR indica progressió òptima i segura en el programa?',opts:['A. ACWR > 2,0 (màxim progrés)','B. ACWR 0,8-1,3 (zona verda de seguretat)','C. ACWR = 0 (sense exercici)','D. ACWR > 1,5 sempre'],correct:1,exp:'Gabbett (2016) estableix que un ACWR entre 0,8 i 1,3 representa la "zona verda" de progressió segura. Valors > 1,5 augmenten significativament el risc de lesió. El programa estabilitza l\'ACWR a 1,0-1,3 en la fase de manteniment.'},
+];
+
+let S={coins:0,sessions:0,unlocked:['cem'],sym:{chest:'no',dizzy:'no',breath:'no',palp:'no',legs:'no'},currentZone:null,rHits:0,rPassed:false,qCorrect:false,rInt:null,tInt:null,rFn:null};
+
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='screen-zone-select') renderZones();
+  if(id==='screen-map') renderMap();
+}
+
+function checkPA(){
+  const pas=parseInt(document.getElementById('pas').value)||0;
+  const pad=parseInt(document.getElementById('pad').value)||0;
+  const res=document.getElementById('pa-result');
+  const adv=document.getElementById('pa-advice');
+  const sym=document.getElementById('symptoms-card');
+  const act=document.getElementById('pa-action');
+  if(!pas||!pad){res.innerHTML='';adv.style.display='none';sym.style.display='none';act.innerHTML='';return;}
+  sym.style.display='block';
+  let cls,dot,title,advice;
+  if(pas>=180||pad>=110){
+    cls='sem-red';dot='dot-red';
+    title='⛔ Pressió molt alta — NO fer exercici';
+    advice='PAS ≥ 180 mmHg o PAD ≥ 110 mmHg. Aquesta és una contraindicació absoluta per a l\'exercici físic (ACSM, 2022). Reposa 20 minuts en posició asseguda i torna a mesurar. Si es manté, contacta el teu metge o el CAP Poblenou avui mateix. No iniciïs cap sessió.';
+  } else if(pas>=160||pad>=100){
+    cls='sem-yellow';dot='dot-yellow';
+    title='⚠️ Pressió alta — Exercici molt lleu únicament';
+    advice='PAS 160-179 mmHg o PAD 100-109 mmHg (HTA Grau 2). Pots fer exercici molt lleu si no tens símptomes: caminada suau o estiraments, RPE màxim 11 (Borg 6-20). Monitoritza la FC contínuament. Si apareix qualsevol símptoma, atura\'t i consulta el metge.';
+  } else if(pas>=140||pad>=90){
+    cls='sem-yellow';dot='dot-yellow';
+    title='🟡 Hipertensió Grau 1 — Exercici moderat permès';
+    advice='PAS 140-159 mmHg o PAD 90-99 mmHg (HTA Grau 1). Pots fer exercici moderat: 50-65% FCmax, RPE ≤ 13. Escalfament prolongat (12 min). Evita exercicis isomètrics intensos. Mesura PA post-sessió als 5 i 30 minuts.';
+  } else if(pas>=120||pad>=80){
+    cls='sem-yellow';dot='dot-yellow';
+    title='🟡 Normal-alta — Exercici moderat recomanat';
+    advice='Nivells lleugerament elevats. L\'exercici regular ajudarà a reduir la PA. Intensitat recomanada: 60-70% FCmax. Hidrata\'t bé i mesura PA post-sessió.';
+  } else {
+    cls='sem-green';dot='dot-green';
+    title='✅ Pressió òptima — Perfecte per entrenar!';
+    advice='Excel·lent! La teva PA és òptima per iniciar la sessió (PAS < 120 mmHg i PAD < 80 mmHg). Pots treballar a intensitat moderada-alta d\'acord amb el programa. Bona sessió!';
+  }
+  res.innerHTML=`<div class="semafore ${cls}"><div class="sem-dot ${dot}"></div><div>${title}</div></div>`;
+  adv.style.display='block';adv.innerHTML=advice;
+  renderAction();
+}
+
+function setSym(btn,key,val){
+  const row=btn.closest('.toggle-btns');
+  row.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('sel-no','sel-yes'));
+  btn.classList.add(val==='no'?'sel-no':'sel-yes');
+  S.sym[key]=val;
+  renderAction();
+}
+
+function renderAction(){
+  const pas=parseInt(document.getElementById('pas').value)||0;
+  const pad=parseInt(document.getElementById('pad').value)||0;
+  const badSym=Object.values(S.sym).some(v=>v==='yes');
+  const act=document.getElementById('pa-action');
+  if(!pas||!pad){act.innerHTML='';return;}
+  if(pas>=180||pad>=110){
+    act.innerHTML='<div class="semafore sem-red" style="justify-content:center">⛔ Sessió no recomanada. Contacta el teu metge.</div>';
+  } else if(badSym){
+    act.innerHTML='<div class="semafore sem-red" style="justify-content:center">⚠️ Símptomes detectats. Consulta el metge abans de fer exercici.</div>';
+  } else {
+    act.innerHTML='<button class="btn btn-success btn-block" onclick="goTo(\'screen-zone-select\')" style="font-size:15px;padding:12px"><i class="ti ti-player-play"></i> Iniciar sessió — Selecciona la zona</button>';
+  }
+}
+
+function renderZones(){
+  document.getElementById('coins-zs').textContent=S.coins;
+  document.getElementById('sessions-zs').textContent=S.sessions+' sessions';
+  const c=document.getElementById('zones-list');c.innerHTML='';
+  ZONES.forEach(z=>{
+    const ul=S.unlocked.includes(z.id);
+    const canU=!ul&&S.coins>=z.cost;
+    const d=document.createElement('div');
+    d.className='zone-card'+(ul?' unlocked':' locked');
+    d.innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <span style="font-size:28px">${z.emoji}</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#111827">${z.name}</div>
+      <div class="muted" style="font-size:11px">${z.type}</div></div>
+      ${ul?'<span class="badge badge-green"><i class="ti ti-check"></i> Desbloquejat</span>':'<span class="badge badge-gray">🪙 '+z.cost+'</span>'}
+    </div>
+    <p class="muted" style="font-size:12px;margin-bottom:8px">${z.exercise}</p>
+    <div class="progress-bar"><div class="progress-fill" style="width:${ul?100:Math.min(100,Math.round(S.coins/z.cost*100))}%"></div></div>
+    ${ul?`<button class="btn btn-success btn-block" onclick="selectZone('${z.id}')"><i class="ti ti-player-play"></i> Fer sessió aquí (+${z.coins}🪙)</button>`:
+    canU?`<button class="btn btn-primary btn-block" onclick="unlockZone('${z.id}')"><i class="ti ti-lock-open"></i> Desbloquejar (🪙${z.cost})</button>`:
+    `<div style="text-align:center;font-size:12px;color:#9ca3af;padding:6px"><i class="ti ti-lock"></i> Necessites 🪙${z.cost} (tens ${S.coins})</div>`}`;
+    c.appendChild(d);
+  });
+}
+
+function unlockZone(id){
+  const z=ZONES.find(z=>z.id===id);
+  if(S.coins>=z.cost&&!S.unlocked.includes(id)){S.coins-=z.cost;S.unlocked.push(id);renderZones();}
+}
+
+function selectZone(id){
+  S.currentZone=ZONES.find(z=>z.id===id);
+  S.rHits=0;S.rPassed=false;S.qCorrect=false;
+  clearInterval(S.rInt);clearInterval(S.tInt);
+  const z=S.currentZone;
+  document.getElementById('mg-emoji').textContent=z.emoji;
+  document.getElementById('mg-name').textContent=z.name;
+  document.getElementById('mg-type').textContent=z.type;
+  document.getElementById('mg-exercise').textContent='Sessió: '+z.exercise;
+  document.getElementById('phase-rhythm').style.display='block';
+  document.getElementById('phase-question').style.display='none';
+  document.getElementById('phase-complete').style.display='none';
+  document.getElementById('rhythm-result').style.display='none';
+  document.getElementById('hit-count').textContent='0';
+  document.getElementById('timer-disp').textContent='20';
+  const tb=document.getElementById('tap-btn');tb.disabled=false;tb.textContent='TAP!';
+  const needed=6;
+  document.getElementById('hits-needed').textContent=needed;
+  initRhythm(needed);
+  goTo('screen-minigame');
+}
+
+function initRhythm(needed){
+  const disp=document.getElementById('rhythm-display');disp.innerHTML='';
+  for(let i=0;i<5;i++){const c=document.createElement('div');c.className='beat-circle';c.id='bc'+i;disp.appendChild(c);}
+  const seq=[0,2,4,1,3,0,2,1,4,3,2,0,1,3,4];let si=0,timeLeft=20,hits=0;
+  S.rInt=setInterval(()=>{
+    document.querySelectorAll('.beat-circle').forEach(c=>c.classList.remove('active'));
+    const ac=document.getElementById('bc'+seq[si%seq.length]);
+    if(ac)ac.classList.add('active');
+    si++;
+  },450);
+  S.tInt=setInterval(()=>{
+    timeLeft--;document.getElementById('timer-disp').textContent=timeLeft;
+    if(timeLeft<=0){
+      clearInterval(S.rInt);clearInterval(S.tInt);
+      document.querySelectorAll('.beat-circle').forEach(c=>c.classList.remove('active'));
+      document.getElementById('tap-btn').disabled=true;
+      endRhythm(hits,needed);
+    }
+  },1000);
+  S.rFn=()=>{hits++;document.getElementById('hit-count').textContent=hits;};
+}
+
+function rhythmHit(){
+  if(S.rFn)S.rFn();
+  const ac=document.querySelector('.beat-circle.active');
+  if(ac){ac.classList.add('hit');setTimeout(()=>ac.classList.remove('hit'),150);}
+}
+
+function endRhythm(hits,needed){
+  const ok=hits>=needed;S.rPassed=ok;
+  const r=document.getElementById('rhythm-result');r.style.display='block';
+  r.innerHTML=ok
+    ?`<div class="semafore sem-green"><div class="sem-dot dot-green"></div>Molt bé! ${hits}/${needed} encerts. Ets una campiona!</div>`
+    :`<div class="semafore sem-yellow"><div class="sem-dot dot-yellow"></div>${hits}/${needed} encerts. Bon esforç! Seguim amb la pregunta.</div>`;
+  setTimeout(()=>showQ(),1800);
+}
+
+function showQ(){
+  document.getElementById('phase-rhythm').style.display='none';
+  document.getElementById('phase-question').style.display='block';
+  const q=QUESTIONS[S.currentZone.q];
+  document.getElementById('q-text').textContent=q.q;
+  const opts=document.getElementById('q-opts');opts.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const b=document.createElement('button');b.className='question-opt';b.textContent=opt;
+    b.onclick=()=>answerQ(i,q,b);opts.appendChild(b);
+  });
+  document.getElementById('q-feedback').style.display='none';
+}
+
+function answerQ(i,q,btn){
+  document.querySelectorAll('.question-opt').forEach(b=>b.disabled=true);
+  document.querySelectorAll('.question-opt').forEach((b,idx)=>{
+    if(idx===q.correct)b.classList.add('correct');
+    else if(idx===i&&i!==q.correct)b.classList.add('wrong');
+  });
+  S.qCorrect=(i===q.correct);
+  const fb=document.getElementById('q-feedback');fb.style.display='block';
+  fb.className='feedback-box '+(S.qCorrect?'fb-ok':'fb-warn');
+  fb.innerHTML=(S.qCorrect?'✅ <strong>Correcte!</strong> ':'💡 <strong>Resposta incorrecta.</strong> ')+q.exp;
+  setTimeout(()=>showComplete(),2500);
+}
+
+function showComplete(){
+  document.getElementById('phase-question').style.display='none';
+  document.getElementById('phase-complete').style.display='block';
+  const z=S.currentZone;
+  let earned=z.coins;
+  if(S.rPassed)earned+=5;
+  if(S.qCorrect)earned+=5;
+  S.coins+=earned;S.sessions++;
+  const stars=S.rPassed&&S.qCorrect?'🌟🌟🌟':S.rPassed||S.qCorrect?'⭐⭐':'⭐';
+  document.getElementById('complete-stars').textContent=stars;
+  document.getElementById('complete-title').textContent=S.rPassed&&S.qCorrect?'Sessió perfecta!':'Sessió completada!';
+  document.getElementById('complete-sub').textContent='Has completat la sessió al '+z.name+'. '+( S.coins>=20?'Ja pots desbloquejar nous espais!':'Segueix guanyant monedes per desbloquejar més zones!');
+  document.getElementById('coins-earned').textContent=earned;
+}
+
+function renderMap(){
+  document.getElementById('coins-map').textContent=S.coins;
+  document.getElementById('unlock-prog').textContent=S.unlocked.length+'/6 zones';
+  const wrap=document.getElementById('map-wrap');
+  wrap.querySelectorAll('.zone-pin').forEach(e=>e.remove());
+  ZONES.forEach(z=>{
+    const ul=S.unlocked.includes(z.id);
+    const pin=document.createElement('div');
+    pin.className='zone-pin'+(ul?'':' locked');
+    pin.style.left=z.x+'%';pin.style.top=z.y+'%';
+    pin.innerHTML=`<div class="pin-circle" style="background:${ul?z.bg:'#94a3b8'}">${z.emoji}</div><div class="pin-label">${z.name.split(' ').slice(0,2).join(' ')}</div>`;
+    pin.onclick=()=>showZoneDetail(z.id);
+    wrap.appendChild(pin);
+  });
+  renderLegend();
+}
+
+function renderLegend(){
+  const leg=document.getElementById('map-legend');leg.innerHTML='';
+  ZONES.forEach(z=>{
+    const ul=S.unlocked.includes(z.id);
+    const item=document.createElement('div');item.className='legend-item';
+    item.innerHTML=`<span style="font-size:20px">${z.emoji}</span>
+      <div><div style="font-weight:600;color:#111827;font-size:12px">${z.name}</div>
+      <div style="font-size:10px;color:#6b7280">${ul?'✅ Desbloquejat':'🔒 🪙'+z.cost}</div></div>`;
+    item.onclick=()=>showZoneDetail(z.id);
+    leg.appendChild(item);
+  });
+}
+
+function showZoneDetail(id){
+  const z=ZONES.find(z=>z.id===id);
+  const ul=S.unlocked.includes(z.id);
+  const d=document.getElementById('zone-detail-map');d.style.display='block';
+  d.innerHTML=`<div class="zone-detail-box${ul?'':' locked'}">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:30px">${z.emoji}</span>
+      <div><div style="font-size:15px;font-weight:600;color:#111827">${z.name}</div>
+      <div class="muted" style="font-size:11px">${z.type}</div></div>
+    </div>
+    <p class="muted" style="font-size:12px;margin-bottom:6px">${z.desc}</p>
+    <div class="sep"></div>
+    <p style="font-size:12px;color:#374151"><strong>Sessió:</strong> ${z.exercise}</p>
+    <div style="margin-top:10px">
+    ${ul?`<button class="btn btn-success btn-block" onclick="goTo('screen-pa')"><i class="ti ti-player-play"></i> Fer una sessió aquí</button>`
+    :`<div style="text-align:center;font-size:12px;color:#9ca3af;padding:6px"><i class="ti ti-lock"></i> Necessites 🪙${z.cost} monedes per desbloquejar</div>`}
+    </div>
+  </div>`;
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&document.getElementById('screen-minigame').classList.contains('active')){
+    e.preventDefault();rhythmHit();
+  }
+});
+</script>
+</body>
+</html>
